@@ -107,9 +107,7 @@ export function isBoolean(v: unknown): v is boolean {
  * здесь не учтено много факторов
  * в интернет можно найти более полные реализации
  */
-export function createElement<
-    T extends HTMLElement
-    >(
+export function createElement<T extends HTMLElement>(
     tagName: keyof HTMLElementTagNameMap,
     props?: Partial<Record<keyof T, string | boolean | object>>,
     children?: HTMLElement | HTMLElement []
