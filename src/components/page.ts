@@ -27,7 +27,7 @@ export class Page extends Component<IPage> {
 
         // Добавляем обработчик события клика по корзине
         this._basket.addEventListener('click', () => {
-            this.events.emit('bids:open');
+            this.events.emit('basket:open');
         });
     }
 

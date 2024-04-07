@@ -1,38 +1,46 @@
 import { Component } from './base/components';
-import { CDN_URL } from '../utils/constants';
 import { ensureElement } from '../utils/utils';
 import { IProduct } from '../types/index';
 
 interface IProductCardActions {
-	onClick: (event: MouseEvent) => void;
+	onClick: (event: MouseEvent, product: IProduct) => void;
+	data?: IProduct;
 }
 
 export class ProductCard extends Component<IProduct> {
 	// Ссылки на внутренние элементы карточки
 	protected _title: HTMLElement;
-	protected _image: HTMLImageElement;
+	protected _image?: HTMLImageElement;
 	protected _category: HTMLElement;
-	protected _description: HTMLElement;
+	protected _description?: HTMLElement;
 	protected _price: HTMLElement;
 	protected _button: HTMLButtonElement;
+	protected _data: IProduct;
 
 	// Конструктор принимает родительский контейнер
 	// и объект с колбэк функциями
 	constructor(container: HTMLElement, actions?: IProductCardActions) {
 		super(container);
 
+		this._data = actions?.data || ({} as IProduct);
+
 		this._title = ensureElement<HTMLElement>(`.card__title`, container);
 		this._image = ensureElement<HTMLImageElement>(`.card__image`, container);
 		this._button = container.querySelector(`.card__button`);
 		this._description = container.querySelector(`.card__text`);
 		this._category = container.querySelector(`.card__category`);
-		this._price = container.querySelector(`.$card__price`);
+		this._price = container.querySelector(`.card__price`);
+
 
 		if (actions?.onClick) {
 			if (this._button) {
-				this._button.addEventListener('click', actions.onClick);
+				this._button.addEventListener('click', (event) => {
+					actions.onClick(event, this._data);
+				});
 			} else {
-				container.addEventListener('click', actions.onClick);
+				container.addEventListener('click', (event) => {
+					actions.onClick(event, this._data);
+				});
 			}
 		}
 	}
@@ -55,7 +63,7 @@ export class ProductCard extends Component<IProduct> {
 
 	//сеттер картинки
 	set image(value: string) {
-		this._image.src = CDN_URL + value;
+		this.setImage(this._image, value, this.title);
 	}
 
 	// сеттер цены
@@ -67,7 +75,20 @@ export class ProductCard extends Component<IProduct> {
 	}
 
 	// сеттер категории
-	set category(value: string) {
-		this._category.textContent = value;
+	setCategory(value: string) {
+		this.setText(this._category, value);
 	}
+
+	// Сеттер и геттер для описания (необязательный)
+	set description(value: string | null) {
+		if (value) {
+			this.setText(this._description, value);
+		} else {
+			this._description?.remove();
+		}
+	}
+	get description(): string | null {
+		return this._description?.textContent || null;
+	}
+
 }

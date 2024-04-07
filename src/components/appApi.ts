@@ -1,4 +1,4 @@
-import { Api } from './base/api';
+import { Api, ApiListResponse } from './base/api';
 import { IProduct, IOrder, IOrderResult } from '../types';
 
 export interface IAppAPI {
@@ -15,14 +15,12 @@ export class AppAPI extends Api implements IAppAPI {
 	}
 
 	getProductList(): Promise<IProduct[]> {
-		return this.get('/product').then(
-			(response: { total: number; items: IProduct[] }) => {
-				return response.items.map((item) => ({
-					...item,
-					image: this.cdn + item.image,
-				}));
-			}
-		);
+		return this.get('/product/').then((data: ApiListResponse<IProduct>) => {
+			return data.items.map((item) => ({
+				...item,
+				image: this.cdn + item.image,
+			}));
+		});
 	}
 
 	postOrderProduct(order: IOrder): Promise<IOrderResult> {

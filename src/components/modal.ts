@@ -9,74 +9,49 @@ interface IModalData {
 }
 
 export class Modal extends Component<IModalData> {
-	protected container: HTMLElement;
-	protected events: IEvents;
-	private _closeButton: HTMLButtonElement;
-	private _content: HTMLElement;
-	private _addToBasketButton: HTMLButtonElement;
+	protected _closeButton: HTMLButtonElement; 
+	protected _content: HTMLElement;
+	protected _addToBasketButton: HTMLElement;
 
-	constructor(container: HTMLElement | string) {
-		super(container as HTMLElement);
+	constructor(container: HTMLElement, protected events: IEvents) {
+		super(container);
 
-		// Инициализируем кнопку закрытия модального окна.
-		this._closeButton = ensureElement<HTMLButtonElement>('.modal__close', this.container);
+		// Инициализируем ссылки на элементы модального окна
+		this._closeButton = ensureElement<HTMLButtonElement>('.modal__close', container);
+		this._content = ensureElement<HTMLElement>('.modal__content', container);
 
-		// Инициализируем содержимое модального окна.
-		this._content = ensureElement<HTMLElement>('.modal__content', this.container);
+		// Добавляем обработчик события клика на кнопку закрытия
+		this._closeButton.addEventListener('click', this.close.bind(this));
 
-		// Инициализируем кнопку добавления товара в корзину.
-		this._addToBasketButton = ensureElement<HTMLButtonElement>('.card__button', this.container);
+		// Добавляем обработчик события клика на содержимое модального окна (чтобы предотвратить закрытие при клике внутри него)
+		this.container.addEventListener('click', this.close.bind(this));
 
-		this.init();
+		// Добавляем обработчик события `stopPropagation()` на содержимое модального окна
+		this._content.addEventListener('click', (event) => event.stopPropagation());
 	}
 
-	// Метод init инициализирует модальное окно.
-	protected init() {
-		// Добавляем обработчик события клика на кнопку закрытия.
-		this._closeButton.addEventListener('click', () => this.close());
-
-		// Получаем целевой элемент события.
-		this.container.addEventListener('click', (e) => {
-			const target = e.target as HTMLElement;
-
-			// Если целевой элемент не является кнопкой добавления в корзину и не является потомком содержимого, закрываем модальное окно.
-			if (
-				target !== this._addToBasketButton &&
-				!this._content.contains(target)
-			) {
-				this.close();
-			}
-		});
+	// Сеттер для содержимого модального окна
+	set content(value: HTMLElement) {
+		this._content.replaceChildren(value); // Заменяем содержимое модального окна новым значением
 	}
 
-	// Метод open открывает модальное окно.
-	open(data?: IModalData) {
-		// Добавляем класс modal--open для открытия модального окна.
-		this.container.classList.add('modal--open');
-
-		// Вызываем событие modal:open.
-		this.events.emit('modal:open');
-
-		// Если переданы данные, отрисовываем их в модальном окне.
-		if (data) {
-			this.render(data);
-		}
+	// Метод открытия модального окна
+	open() {
+		this.container.classList.add('modal_active'); // Добавляем класс "modal_active" для открытия модального окна
+		this.events.emit('modal:open'); // Вызываем событие "modal:open"
 	}
 
-	// Метод close закрывает модальное окно.
+	// Метод закрытия модального окна
 	close() {
-		this.container.classList.remove('modal--open'); // Удаляем класс modal--open для закрытия модального окна.
-
-		this._content.innerHTML = ''; // Очищаем содержимое модального окна.
-
-		this.events.emit('modal:close'); // Вызываем событие modal:close.
+		this.container.classList.remove('modal_active'); // Удаляем класс "modal_active" для закрытия модального окна
+		this.content = null; // Очищаем содержимое модального окна
+		this.events.emit('modal:close'); // Вызываем событие "modal:close"
 	}
 
+	// Метод рендеринга данных в модальном окне
 	render(data: IModalData): HTMLElement {
-		// Метод render отрисовывает данные в модальном окне.
-		this._content.appendChild(data.content);
-		// Добавляем содержимое в модальное окно.
+		super.render(data);
+		this.open();
 		return this.container;
-		// Возвращаем контейнер модального окна.
 	}
 }

@@ -5,12 +5,13 @@ interface ISuccessActions {
 }
 
 export interface ISuccess {
-	description: number;
+	id: string;
+	total: number;
 }
 
 export class Success extends Component<ISuccess> {
 	protected _button: HTMLButtonElement;
-	protected _description: HTMLElement;
+	protected _total: HTMLElement;
 
 	constructor(
 		container: HTMLElement,
@@ -19,7 +20,7 @@ export class Success extends Component<ISuccess> {
 		super(container);
 
 		this._button = container.querySelector(`.order-success__close`);
-		this._description = container.querySelector(`.order-success__description`);
+		this._total = container.querySelector(`.order-success__description`);
 
 		if (actions?.onClick) {
 			if (this._button) {
@@ -29,8 +30,7 @@ export class Success extends Component<ISuccess> {
 	}
 
 	// Установка значения описания успешного действия
-	set description(value: number) {
-		// Установка текста описания
-		this._description.textContent = `Списано ${value} синапсов`;
+	set total(total: string) {
+		this.setText(this._total, total);
+	  }
 	}
-}

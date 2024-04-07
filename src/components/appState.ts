@@ -11,6 +11,10 @@ export class Product extends Model<IProduct> {
 	price: number | null;
 }
 
+export type CatalogChangeEvent = {
+	catalog: Product[];
+};
+
 // Класс, описывающий состояние приложения
 export class AppState extends Model<IAppState> {
 	basket: Product[] = []; // Корзина с товарами
@@ -19,11 +23,11 @@ export class AppState extends Model<IAppState> {
 	// установка товаров в магазине
 	setProductList(items: IProduct[]) {
 		this.catalog = items.map((item) => new Product({ ...item }, this.events));
-		this.emitChanges('items:changed', { store: this.catalog });
+		this.emitChanges('items:changed', { catalog: this.catalog });
 	}
 
 	// Объект заказа клиента и объект с ошибками форм
-	orderDetails: IOrder = {
+	order: IOrder = {
 		items: [],
 		payment: '',
 		total: null,
@@ -32,19 +36,20 @@ export class AppState extends Model<IAppState> {
 		phone: '',
 	};
 
-    formErrors: FormErrors = {};
-	order: any;
+	formErrors: FormErrors = {};
 
 	// Методы работы с корзиной
 
 	// Добавление товара в корзину
-	addProductToBasket(value: Product) {
-		this.basket = [...this.basket, value];
+	addProductToBasket(item: Product) {
+		this.basket.push(item);
+		this.emitChanges('basket:changed');
 	}
 
 	// Удаление товара из корзины по его id
-	removeProductFromBasket(id: string) {
-		this.basket = this.basket.filter((item) => item.id !== id);
+	removeProductFromBasket(item: Product) {
+		this.basket = this.basket.filter((el) => el.id != item.id);
+		this.emitChanges('basket:changed');
 	}
 
 	// Получение количества товаров в корзине
@@ -54,34 +59,60 @@ export class AppState extends Model<IAppState> {
 
 	// Установка заказанных товаров
 	setOrderedItems() {
-		this.orderDetails.items = [...new Set(this.basket.map((item) => item.id))];
+		this.order.items = [...new Set(this.basket.map((item) => item.id))];
 	}
 
 	// Получение общей стоимости товаров в корзине
 	getBasketTotal() {
-		return this.basket.reduce((sum, next) => sum + next.price, 0);
+		return this.basket.reduce((sum, item) => sum + item.price, 0);
+	}
+
+	clearBasket() {
+		this.basket = [];
+		this.emitChanges('counter:changed', this.basket);
+		this.emitChanges('basket:changed', this.basket);
 	}
 
 	// Установка значения поля заказа
 	setOrderField(field: keyof IOrderForm, value: string) {
 		this.order[field] = value;
+	
+		if (this.validateOrder()) {
+		  this.events.emit('order:ready', this.order);
+		}
+	  }
+	
+	setContactsField(field: keyof IOrderForm, value: string) {
+		this.order[field] = value;
+
+		if (this.validateContacts()) {
+			this.events.emit('contacts:ready', this.order);
+		}
 	}
 
-    // валидация форм
-    validateOrder() {
+	validateOrder() {
 		const errors: typeof this.formErrors = {};
-		if (!this.orderDetails.email) {
-			errors.email = 'Необходимо указать email';
-		}
-		if (!this.orderDetails.phone) {
-			errors.phone = 'Необходимо указать телефон';
-		}
-		if (!this.orderDetails.address) {
+		if (!this.order.address) {
 			errors.address = 'Необходимо указать адрес';
 		}
-		if (!this.orderDetails.payment) {
-			errors.payment = 'Необходимо указать способ оплаты';
+
+		this.formErrors = errors;
+		this.events.emit('formErrors:change', this.formErrors);
+
+		return Object.keys(errors).length === 0;
+	}
+
+	validateContacts() {
+		const errors: typeof this.formErrors = {};
+
+		if (!this.order.email) {
+			errors.email = 'Необходимо указать email';
 		}
+
+		if (!this.order.phone) {
+			errors.phone = 'Необходимо указать телефон';
+		}
+
 		this.formErrors = errors;
 		this.events.emit('formErrors:change', this.formErrors);
 		return Object.keys(errors).length === 0;

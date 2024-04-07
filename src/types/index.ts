@@ -6,8 +6,14 @@ export interface IProduct {
 	title: string;
 	description?: string;
 	image?: string;
-	category: string;
+	category?: string;
 	price: number | null;
+}
+
+// товар в списке корзины
+export interface IProductInBasket extends IProduct {
+	// Порядковый номер в корзине
+	index: number;
 }
 
 // Заказ товара
