@@ -31,6 +31,6 @@ export class Success extends Component<ISuccess> {
 
 	// Установка значения описания успешного действия
 	set total(total: string) {
-		this.setText(this._total, total);
+		this.setText(this._total, `Списано ${total} синапсов`)
 	  }
 	}

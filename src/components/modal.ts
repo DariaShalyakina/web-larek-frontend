@@ -37,15 +37,15 @@ export class Modal extends Component<IModalData> {
 
 	// Метод открытия модального окна
 	open() {
-		this.container.classList.add('modal_active'); // Добавляем класс "modal_active" для открытия модального окна
-		this.events.emit('modal:open'); // Вызываем событие "modal:open"
+		this.toggleClass(this.container, 'modal_active', true); // Используем toggleClass для открытия модального окна
+		this.events.emit('modal:open');
 	}
 
 	// Метод закрытия модального окна
 	close() {
-		this.container.classList.remove('modal_active'); // Удаляем класс "modal_active" для закрытия модального окна
+		this.toggleClass(this.container, 'modal_active', false); // Используем toggleClass для закрытия модального окна
 		this.content = null; // Очищаем содержимое модального окна
-		this.events.emit('modal:close'); // Вызываем событие "modal:close"
+		this.events.emit('modal:close');
 	}
 
 	// Метод рендеринга данных в модальном окне

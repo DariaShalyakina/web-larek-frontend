@@ -5,7 +5,7 @@ import { ensureElement } from '../utils/utils';
 // Интерфейс описывает форму.
 interface IForm {
 	valid: boolean;
-	errors: string[]; 
+	errors: string[];
 }
 
 // Класс-компонент для формы.
@@ -13,14 +13,14 @@ export class Form<T> extends Component<IForm> {
 	protected _submit: HTMLButtonElement;
 	protected _errors: HTMLElement;
 
-	constructor(
-		protected container: HTMLFormElement,
-		protected events: IEvents
-	) {
+	constructor(protected container: HTMLFormElement, protected events: IEvents) {
 		super(container);
 
 		// Ищем кнопку отправки формы.
-		this._submit = ensureElement<HTMLButtonElement>('button[type=submit]', this.container);
+		this._submit = ensureElement<HTMLButtonElement>(
+			'button[type=submit]',
+			this.container
+		);
 		// Ищем блок с ошибками.
 		this._errors = ensureElement<HTMLElement>('.form__errors', this.container);
 
@@ -44,19 +44,20 @@ export class Form<T> extends Component<IForm> {
 		// Вызываем событие изменения поля формы.
 		this.events.emit(`${this.container.name}.${String(field)}:change`, {
 			field,
-			value, 
+			value,
 		});
 	}
 
 	// Установка свойства valid.
 	set valid(value: boolean) {
 		this._submit.disabled = !value; // Отключение кнопки отправки, если форма невалидна.
+		this.setDisabled(this._submit, !value); // использование setDisabled для деактивации кнопки
 	}
 
 	// Установка свойства errors.
 	set errors(value: string) {
-		this._errors.textContent = value; // Отображение ошибок в блоке.
-	}
+		this.setText(this._errors, value); // Отображение ошибок в блоке.
+	} 
 
 	// Отрисовка формы.
 	render(state: Partial<T> & IForm): HTMLFormElement {

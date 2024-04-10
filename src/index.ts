@@ -11,8 +11,8 @@ import { AppState, Product } from './components/appState';
 import { ProductCard } from './components/productCard';
 import { Modal } from './components/modal';
 import { Basket, ProductInBasket } from './components/basket';
-import { Order } from './components/order';
-import { Contacts } from './components/contacts';
+import { OrderForm } from './components/order';
+import { ContactsForm } from './components/contacts';
 import { Success } from './components/success';
 
 // Создаем экземпляр класса EventEmitter для обработки событий
@@ -44,8 +44,8 @@ const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
 
 // Переиспользуемые части
 const basket = new Basket(cloneTemplate(basketTemplate), events);
-const order = new Order(cloneTemplate(orderTemplate), events);
-const contact = new Contacts(cloneTemplate(contactsTemplate), events);
+const order = new OrderForm(cloneTemplate(orderTemplate), events);
+const contact = new ContactsForm(cloneTemplate(contactsTemplate), events);
 
 //запрос к серверу для получения карточек
 api
@@ -76,34 +76,37 @@ events.on('items:changed', () => {
 
 // Обработчик события изменения текущего товара
 events.on('preview:changed', (data: IProduct) => {
-	// карточка товара для превью
 	const preview = new ProductCard(cloneTemplate(productPrewiewTemplate), {
-		onClick: () => {
-			appData.addProductToBasket(data as Product);
-			events.emit('basket:update');
-			page.counter = appData.basket.length;
-			modal.close();
-		},
+	  onClick: () => {
+		if (!appData.isProductInBasket(data)) {
+		  appData.addProductToBasket(data as Product);
+		  preview.buttonText = 'Уже в корзине';
+		  modal.close();
+		} 
+  
+		//обновляем счетчик
+		events.emit('basket:update');
+		page.counter = appData.basket.length;
+	  },
 	});
-
+  
 	// данные в карточке превью
 	preview.image = data.image;
 	preview.title = data.title;
 	preview.price = data.price;
 	preview.setCategory(data.category);
 	preview.description = data.description; // описание, если оно есть
+	preview.buttonText = appData.isProductInBasket(data)? 'Уже в корзине' : 'В корзину'
 
+	if (!data.price) {
+		preview.buttonText = 'Не купить';
+	}
+  
 	// отображаем превью
 	modal.content = preview.render();
 	modal.open();
-});
+  });
 
-// добавления карточки в корзину
-events.on('basket:add', (item: Product) => {
-	appData.addProductToBasket(item);
-	events.emit('counter:changed');
-	events.emit('basket:changed');
-});
 
 // удаление карточки из корзины
 events.on('basket:remove', (item: Product) => {
@@ -126,8 +129,6 @@ events.on('basket:open', () => {
 
 // Отображение элементов в корзине
 events.on('basket:changed', () => {
-	appData.setOrderedItems();
-
 	const basketItems = appData.basket.map((item, index) => {
 		// Создаем карточку товара в корзине
 		const productItem = new ProductInBasket(cloneTemplate(productbasketModal), {

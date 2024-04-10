@@ -63,7 +63,7 @@ yarn build
 
 - AppAPI
 - AppState
-- Order
+- OrderForm
 
 ### View
 
@@ -77,7 +77,7 @@ yarn build
 - ProductCard
 - Basket
 - ProductInBasket
-- Contacts
+- ContactsForm
 - Success
 
 ### Presenter
@@ -192,6 +192,7 @@ constructor(container: HTMLElement, actions?: IProductCardActions)
 - set image(value: string): Устанавливает ссылку на изображение товара.
 - set price(value: number | null): Устанавливает цену товара.
 - set category(value: string): Устанавливает категорию товара.
+- set buttonText(value: string): Устанавливает текст на кнопку и делает ее неактивной.
 
 **Обработчики событий:**
 Если в конструктор передается объект с колбэк-функцией onClick, она добавляется как обработчик события клика по кнопке добавления товара в корзину или по самой карточке товара, если кнопки нет.
@@ -336,7 +337,7 @@ constructor(container: HTMLFormElement, events: IEvents)
 - input: Вызывается при изменении значения поля формы.
 - submit: Вызывается при отправке формы.
 
-## 8. Contacts
+## 8. ContactsForm
 
 Расширяет класс **Form<T>** и предоставляет дополнительную функциональность для работы с формой контактов:
 
@@ -408,7 +409,7 @@ Model - это абстрактный базовый класс, который 
 - data: Необязательный объект с начальными данными для модели.
 - events: Экземпляр класса IEvents, используемый для взаимодействия с другими частями приложения через события.
 
-## 2. Order
+## 2. OrderForm
 
 **Описание:**
 Класс Order отвечает за отображение и обработку формы заказа.
@@ -470,6 +471,7 @@ constructor(container: HTMLFormElement, events: IEvents)
 
 **Методы работы с корзиной:**
 
+- isProductInBasket(item: IProduct): Проверяет добавлен ли продукт уже в корзину
 - addProductToBasket(value: Product): Добавляет товар в корзину.
 - removeProductFromBasket(id: string): Удаляет товар из корзины по его идентификатору.
 - getBasketCount(): Возвращает количество товаров в корзине.

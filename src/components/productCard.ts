@@ -31,7 +31,6 @@ export class ProductCard extends Component<IProduct> {
 		this._category = container.querySelector(`.card__category`);
 		this._price = container.querySelector(`.card__price`);
 
-
 		if (actions?.onClick) {
 			if (this._button) {
 				this._button.addEventListener('click', (event) => {
@@ -55,7 +54,7 @@ export class ProductCard extends Component<IProduct> {
 
 	// сеттер и гетер для названия
 	set title(value: string) {
-		this._title.textContent = value;
+		this.setText(this._title, value);
 	}
 	get title(): string {
 		return this._title.textContent || '';
@@ -66,11 +65,20 @@ export class ProductCard extends Component<IProduct> {
 		this.setImage(this._image, value, this.title);
 	}
 
+	//устанавливаем текст на кнопку
+	set buttonText(value: string) {
+		this.setText(this._button, value);
+		// обновляем состояние кнопки в зависимости от текста
+		if (value === 'Уже в корзине') {
+			this.setDisabled(this._button, true);
+		}
+	}
+
 	// сеттер цены
 	set price(value: number | null) {
-		this._price.textContent = value ? `${value} синапсов` : 'Бесценно';
-		if (this._button && !value) {
-			this._button.disabled = true;
+		this.setText(this._price, value ? `${value} синапсов` : 'Бесценно');
+		if (!value) {
+			this.setDisabled(this._button, true);
 		}
 	}
 
@@ -90,5 +98,4 @@ export class ProductCard extends Component<IProduct> {
 	get description(): string | null {
 		return this._description?.textContent || null;
 	}
-
 }

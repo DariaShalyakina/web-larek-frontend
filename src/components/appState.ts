@@ -40,6 +40,10 @@ export class AppState extends Model<IAppState> {
 
 	// Методы работы с корзиной
 
+	isProductInBasket(item: IProduct) {
+		return this.basket.some(product => product.id === item.id);
+	}
+
 	// Добавление товара в корзину
 	addProductToBasket(item: Product) {
 		this.basket.push(item);
@@ -47,7 +51,7 @@ export class AppState extends Model<IAppState> {
 	}
 
 	// Удаление товара из корзины по его id
-	removeProductFromBasket(item: Product) {
+	removeProductFromBasket(item: IProduct) {
 		this.basket = this.basket.filter((el) => el.id != item.id);
 		this.emitChanges('basket:changed');
 	}
